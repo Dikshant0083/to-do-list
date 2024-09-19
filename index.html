@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Assignment List</title>
+    <style>
+        /* Same styles as before */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #94b1bc;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .task-container {
+            background-color: #ffffff;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            width: 100%;
+            max-width: 900px;
+            margin: 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        form {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="number"], input[type="date"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+        .submit-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .submit-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="task-container">
+        <h2>Task Assignment List</h2>
+        <form>
+            <input type="text" id="new-task" placeholder="Enter task name">
+            <input type="text" id="assignee-name" placeholder="Assignee name">
+            <input type="number" id="task-duration" placeholder="Duration (hrs)">
+            <input type="date" id="task-date" placeholder="Due date">
+            <button id="add-task">Add Task</button>
+        </form>
+        <table>
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Assignee</th>
+                    <th>Duration (hrs)</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="task-list"></tbody>
+        </table>
+        <button class="submit-button" id="submit-tasks">Submit All Tasks</button>
+    </div>
+
+    <script>
+        const taskList = document.getElementById('task-list');
+        const newTaskInput = document.getElementById('new-task');
+        const assigneeInput = document.getElementById('assignee-name');
+        const taskDurationInput = document.getElementById('task-duration');
+        const taskDateInput = document.getElementById('task-date');
+        const addTaskButton = document.getElementById('add-task');
+        const submitTasksButton = document.getElementById('submit-tasks');
+        
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const taskRow = document.createElement('tr');
+                taskRow.innerHTML = `
+                    <td>${task.name}</td>
+                    <td>${task.assignee}</td>
+                    <td>${task.duration}</td>
+                    <td>${task.date}</td>
+                    <td><button class="delete-button" data-index="${index}">Delete</button></td>`;
+                taskList.appendChild(taskRow);
+            });
+        }
+
+        renderTasks();
+
+        addTaskButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const newTask = newTaskInput.value.trim();
+            const assigneeName = assigneeInput.value.trim();
+            const taskDuration = taskDurationInput.value.trim();
+            const taskDate = taskDateInput.value.trim();
+
+            if (newTask && assigneeName && taskDuration && taskDate) {
+                const task = {
+                    name: newTask,
+                    assignee: assigneeName,
+                    duration: taskDuration,
+                    date: taskDate
+                };
+                tasks.push(task);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                renderTasks();
+                newTaskInput.value = '';
+                assigneeInput.value = '';
+                taskDurationInput.value = '';
+                taskDateInput.value = '';
+            } else {
+                alert('Please fill out all fields.');
+            }
+        });
+
+        taskList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-button')) {
+                const taskIndex = e.target.getAttribute('data-index');
+                tasks.splice(taskIndex, 1);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                renderTasks();
+            }
+        });
+
+        submitTasksButton.addEventListener('click', () => {
+            alert('Tasks submitted: ' + JSON.stringify(tasks));
+        });
+    </script>
+</body>
+</html>
